@@ -1,0 +1,36 @@
+export const Colors = {
+  light: {
+    background: "#ffffff",
+    foreground: "#0a0a0a",
+    card: "#ffffff",
+    cardForeground: "#0a0a0a",
+    primary: "#171717",
+    primaryForeground: "#fafafa",
+    secondary: "#f5f5f5",
+    secondaryForeground: "#171717",
+    muted: "#f5f5f5",
+    mutedForeground: "#737373",
+    destructive: "#ef4444",
+    destructiveForeground: "#fafafa",
+    border: "#e5e5e5",
+    input: "#e5e5e5",
+  },
+  dark: {
+    background: "#0a0a0a",
+    foreground: "#fafafa",
+    card: "#0a0a0a",
+    cardForeground: "#fafafa",
+    primary: "#fafafa",
+    primaryForeground: "#171717",
+    secondary: "#262626",
+    secondaryForeground: "#fafafa",
+    muted: "#262626",
+    mutedForeground: "#a3a3a3",
+    destructive: "#7f1d1d",
+    destructiveForeground: "#fafafa",
+    border: "#262626",
+    input: "#262626",
+  },
+} as const;
+
+export type ThemeColors = typeof Colors.light;
