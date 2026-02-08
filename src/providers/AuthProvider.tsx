@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { API_BASE_URL } from "@/src/constants/config";
 import {
   saveToken,
@@ -26,6 +27,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -63,8 +65,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const data = await response.json();
     await Promise.all([saveToken(data.token), saveUser(data.user)]);
+    queryClient.clear();
     setUser(data.user);
-  }, []);
+  }, [queryClient]);
 
   const register = useCallback(
     async (data: {
@@ -94,8 +97,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await clearAuth();
+    queryClient.clear();
     setUser(null);
-  }, []);
+  }, [queryClient]);
 
   return (
     <AuthContext.Provider

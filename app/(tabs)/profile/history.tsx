@@ -100,7 +100,7 @@ export default function HistoryScreen() {
         contentContainerClassName="px-4 py-4"
         ListHeaderComponent={
           <View className="mb-4 flex-row items-center gap-3">
-            <Pressable onPress={() => router.back()}>
+            <Pressable onPress={() => router.replace("/(tabs)/profile")}>
               <ArrowLeft size={24} color={colors.foreground} />
             </Pressable>
             <Text className="text-xl font-bold text-foreground">

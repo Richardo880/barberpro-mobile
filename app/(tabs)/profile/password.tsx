@@ -47,7 +47,7 @@ export default function ChangePasswordScreen() {
         newPassword,
         confirmPassword,
       });
-      router.back();
+      router.replace("/(tabs)/profile");
     } catch {
       // Error handled by mutation
     }
@@ -60,7 +60,7 @@ export default function ChangePasswordScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView className="flex-1 px-4 py-4" keyboardShouldPersistTaps="handled">
-          <Pressable onPress={() => router.back()} className="mb-4">
+          <Pressable onPress={() => router.replace("/(tabs)/profile")} className="mb-4">
             <ArrowLeft size={24} color={colors.foreground} />
           </Pressable>
 

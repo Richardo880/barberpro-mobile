@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, ScrollView, TextInput, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { CheckCircle2, Calendar, Clock, User, Scissors } from "lucide-react-native";
@@ -16,6 +17,7 @@ import { Colors } from "@/src/constants/colors";
 export default function BookingStep4() {
   const booking = useBooking();
   const createMutation = useCreateAppointment();
+  const queryClient = useQueryClient();
   const router = useRouter();
   const { theme } = useTheme();
   const colors = Colors[theme];
@@ -41,6 +43,8 @@ export default function BookingStep4() {
   const handleDone = () => {
     setShowSuccess(false);
     booking.reset();
+    queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    queryClient.invalidateQueries({ queryKey: ["records"] });
     router.replace("/(tabs)/appointments");
   };
 
