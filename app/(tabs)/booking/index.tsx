@@ -39,7 +39,7 @@ export default function BookingStep1() {
         contentContainerClassName="px-4 py-4"
         ListHeaderComponent={
           <View className="mb-4">
-            <ProgressBar progress={25} className="mb-4" />
+            <ProgressBar progress={20} className="mb-4" />
             <Text className="text-xl font-bold text-foreground">
               Paso 1: Elegí un servicio
             </Text>

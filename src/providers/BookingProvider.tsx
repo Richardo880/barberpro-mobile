@@ -10,6 +10,7 @@ interface BookingState {
   date: string | null;
   timeSlot: string | null;
   slotStart: string | null;
+  paymentProofUrl: string | null;
   notes: string;
 }
 
@@ -17,6 +18,7 @@ interface BookingContextType extends BookingState {
   setService: (id: string, name: string, duration: number, price: number) => void;
   setStaff: (id: string | null, name: string | null) => void;
   setDateTime: (date: string, timeSlot: string, slotStart: string) => void;
+  setPaymentProof: (url: string | null) => void;
   setNotes: (notes: string) => void;
   reset: () => void;
 }
@@ -31,6 +33,7 @@ const initialState: BookingState = {
   date: null,
   timeSlot: null,
   slotStart: null,
+  paymentProofUrl: null,
   notes: "",
 };
 
@@ -66,6 +69,10 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const setPaymentProof = useCallback((url: string | null) => {
+    setState((prev) => ({ ...prev, paymentProofUrl: url }));
+  }, []);
+
   const setNotes = useCallback((notes: string) => {
     setState((prev) => ({ ...prev, notes }));
   }, []);
@@ -76,7 +83,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <BookingContext.Provider
-      value={{ ...state, setService, setStaff, setDateTime, setNotes, reset }}
+      value={{ ...state, setService, setStaff, setDateTime, setPaymentProof, setNotes, reset }}
     >
       {children}
     </BookingContext.Provider>

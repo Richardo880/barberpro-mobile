@@ -33,6 +33,7 @@ interface CreateAppointmentData {
   staffId?: string | null;
   startTime: string;
   clientNotes?: string;
+  paymentProofUrl?: string;
 }
 
 export function useAppointments(params?: AppointmentQueryParams) {

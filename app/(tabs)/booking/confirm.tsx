@@ -1,28 +1,34 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TextInput, Modal } from "react-native";
+import { View, Text, ScrollView, TextInput, Modal, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { CheckCircle2, Calendar, Clock, User, Scissors } from "lucide-react-native";
+import { CheckCircle2, Calendar, Clock, User, Scissors, CreditCard, ImageIcon } from "lucide-react-native";
 import { ProgressBar } from "@/src/components/ui/ProgressBar";
 import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
 import { useCreateAppointment } from "@/src/hooks/use-appointments";
 import { useBooking } from "@/src/providers/BookingProvider";
+import { usePromotion, getDiscountedPrice } from "@/src/hooks/use-promotion";
 import { useTheme } from "@/src/providers/ThemeProvider";
 import { Colors } from "@/src/constants/colors";
 
-export default function BookingStep4() {
+export default function BookingStep5() {
   const booking = useBooking();
   const createMutation = useCreateAppointment();
+  const { data: promoData } = usePromotion();
   const queryClient = useQueryClient();
   const router = useRouter();
   const { theme } = useTheme();
   const colors = Colors[theme];
   const [notes, setNotes] = useState(booking.notes);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const priceInfo = booking.serviceId && booking.servicePrice
+    ? getDiscountedPrice(booking.servicePrice, booking.serviceId, promoData?.promotion, booking.date ?? undefined)
+    : { finalPrice: booking.servicePrice || 0, hasDiscount: false };
 
   const handleConfirm = async () => {
     if (!booking.serviceId || !booking.slotStart) return;
@@ -33,6 +39,7 @@ export default function BookingStep4() {
         staffId: booking.staffId || undefined,
         startTime: booking.slotStart,
         clientNotes: notes.trim() || undefined,
+        paymentProofUrl: booking.paymentProofUrl || undefined,
       });
       setShowSuccess(true);
     } catch {
@@ -49,7 +56,7 @@ export default function BookingStep4() {
   };
 
   const dateFormatted = booking.date
-    ? format(new Date(booking.date), "EEEE d 'de' MMMM, yyyy", { locale: es })
+    ? format(new Date(booking.date + "T00:00:00"), "EEEE d 'de' MMMM, yyyy", { locale: es })
     : "";
 
   return (
@@ -57,7 +64,7 @@ export default function BookingStep4() {
       <ScrollView className="flex-1 px-4 py-4">
         <ProgressBar progress={100} className="mb-4" />
         <Text className="text-xl font-bold text-foreground">
-          Paso 4: Confirmar reserva
+          Paso 5: Confirmar reserva
         </Text>
         <Text className="mt-1 mb-6 text-sm text-muted-foreground">
           Revisá los detalles de tu turno
@@ -106,12 +113,36 @@ export default function BookingStep4() {
             </View>
           </View>
 
+          {booking.paymentProofUrl && (
+            <View className="flex-row items-center gap-3">
+              <ImageIcon size={18} color={colors.foreground} />
+              <View className="flex-1">
+                <Text className="text-xs text-muted-foreground">Comprobante</Text>
+                <View className="mt-1 rounded-lg overflow-hidden border border-border">
+                  <Image
+                    source={{ uri: booking.paymentProofUrl }}
+                    className="w-full h-32"
+                    resizeMode="contain"
+                    style={{ backgroundColor: colors.muted }}
+                  />
+                </View>
+              </View>
+            </View>
+          )}
+
           <View className="mt-4 border-t border-border pt-4">
             <View className="flex-row items-center justify-between">
               <Text className="text-base text-muted-foreground">Total</Text>
-              <Text className="text-xl font-bold text-foreground">
-                {(booking.servicePrice || 0).toLocaleString()} Gs
-              </Text>
+              <View className="items-end">
+                {priceInfo.hasDiscount && (
+                  <Text className="text-sm text-muted-foreground line-through">
+                    {(booking.servicePrice || 0).toLocaleString()} Gs
+                  </Text>
+                )}
+                <Text className="text-xl font-bold text-foreground">
+                  {priceInfo.finalPrice.toLocaleString()} Gs
+                </Text>
+              </View>
             </View>
           </View>
         </Card>

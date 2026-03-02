@@ -52,3 +52,48 @@ export async function apiClient<T>(
 
   return JSON.parse(text);
 }
+
+export async function uploadFile<T>(
+  path: string,
+  fileUri: string,
+  fieldName: string = "file"
+): Promise<T> {
+  const token = await getToken();
+
+  const fileName = fileUri.split("/").pop() || "photo.jpg";
+  const ext = fileName.split(".").pop()?.toLowerCase() || "jpg";
+  const mimeType = `image/${ext === "jpg" ? "jpeg" : ext}`;
+
+  const formData = new FormData();
+  formData.append(fieldName, {
+    uri: fileUri,
+    type: mimeType,
+    name: fileName,
+  } as unknown as Blob);
+
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const url = `${API_BASE_URL}${path}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (response.status === 401) {
+    await clearAuth();
+    throw new AuthError("Sesión expirada");
+  }
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({
+      error: "Error de red",
+    }));
+    throw new Error(error.error || `Error ${response.status}`);
+  }
+
+  return response.json();
+}

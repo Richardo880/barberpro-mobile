@@ -31,12 +31,29 @@ export function isPromoActive(config: PromotionConfig | undefined): boolean {
   return today === config.day;
 }
 
+export function isPromoDayForDate(
+  config: PromotionConfig | undefined,
+  date: Date | string
+): boolean {
+  if (!config || !config.enabled) return false;
+  const dayOfWeek =
+    typeof date === "string"
+      ? new Date(date + "T00:00:00").getDay()
+      : date.getDay();
+  return dayOfWeek === config.day;
+}
+
 export function getDiscountedPrice(
   originalPrice: number,
   serviceId: string,
-  config: PromotionConfig | undefined
+  config: PromotionConfig | undefined,
+  date?: Date | string
 ): { finalPrice: number; hasDiscount: boolean } {
-  if (!config || !isPromoActive(config)) {
+  const isActive = date
+    ? isPromoDayForDate(config, date)
+    : isPromoActive(config);
+
+  if (!config || !isActive) {
     return { finalPrice: originalPrice, hasDiscount: false };
   }
 

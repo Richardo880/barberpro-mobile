@@ -47,13 +47,13 @@ export default function BookingStep3() {
   const handleNext = () => {
     if (!selectedDate || !selectedSlot || !selectedSlotStart) return;
     setDateTime(selectedDate, selectedSlot, selectedSlotStart);
-    router.push("/(tabs)/booking/confirm");
+    router.push("/(tabs)/booking/payment");
   };
 
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView className="flex-1 px-4 py-4" nestedScrollEnabled keyboardShouldPersistTaps="handled">
-        <ProgressBar progress={75} className="mb-4" />
+        <ProgressBar progress={60} className="mb-4" />
         <Text className="text-xl font-bold text-foreground">
           Paso 3: Fecha y hora
         </Text>

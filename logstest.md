@@ -1,230 +1,152 @@
-# Test Suite Implementation Log
+# Session Log — 2026-02-17: Test Suite + Production APK Build
 
 ## Overview
-Full test infrastructure setup for BarberPro Mobile — from zero to comprehensive test coverage before APK build.
 
-**Date:** 2026-02-17
-**Total test files planned:** 17
-**Status:** In Progress
+Set up a complete test suite for the BarberPro Mobile app (from zero test infrastructure) and built a production APK connected to the Vercel backend + Supabase database.
 
 ---
 
-## Phase 1 — Install Dependencies
+## Phase 1 — Test Suite Implementation
 
-### Packages
-- `jest-expo@~54` — Jest preset for Expo SDK 54
-- `@testing-library/react-native@^13` — Component testing (supports React 19)
-- `@testing-library/jest-native@^5` — Extended matchers (toBeVisible, toHaveTextContent, etc.)
-- `react-test-renderer@19.1.0` — Already present in devDependencies
+### Dependencies Installed
 
-**Command:**
 ```bash
 npm install --save-dev jest-expo@~54 @testing-library/react-native@^13 @testing-library/jest-native@^5
 ```
 
-**Status:** Pending
+### Configuration Files Created/Edited
 
----
+| File | Action | Purpose |
+|------|--------|---------|
+| `jest.config.js` | Created | jest-expo preset, `@/` path alias, `transformIgnorePatterns` including `expo-modules-core` |
+| `jest.setup.ts` | Created | Global mocks: fetch, reanimated, nativewind, AsyncStorage, ThemeProvider, safe-area-context, config |
+| `babel.config.js` | Edited | Added `env.test` block overriding `jsxImportSource` to `"react"` (NativeWind JSX breaks Jest) |
+| `package.json` | Edited | Added `test`, `test:watch`, `test:coverage` scripts |
 
-## Phase 2 — Configuration Files
+### Mock Files Created (`__mocks__/`)
 
-### 2.1 `package.json` — Add test scripts
-Added:
-- `"test": "jest"`
-- `"test:watch": "jest --watch"`
-- `"test:coverage": "jest --coverage"`
+| File | Mocks |
+|------|-------|
+| `expo-secure-store.ts` | `getItemAsync`, `setItemAsync`, `deleteItemAsync` |
+| `expo-router.ts` | `useRouter`, `useSegments`, `Link`, `Stack`, `Tabs` |
+| `expo-splash-screen.ts` | `preventAutoHideAsync`, `hideAsync` |
+| `expo-image.ts` | `Image` → standard RN Image |
+| `lucide-react-native.ts` | All used icons as stub View components |
+| `react-native-toast-message.ts` | `Toast.show`, `Toast.hide` |
+| `@expo/vector-icons.ts` | `Ionicons`, `MaterialIcons`, etc. |
 
-### 2.2 `babel.config.js` — Add env.test override
-NativeWind uses `jsxImportSource: "nativewind"` which breaks JSX compilation in Jest.
-Override to `jsxImportSource: "react"` when `NODE_ENV=test`.
+### Test Helper
 
-### 2.3 `jest.config.js` — New file
-- Preset: `jest-expo`
-- Module name mapper for `@/` path alias
-- Transform ignore patterns allowing all Expo/RN/NativeWind packages
-- Setup file: `jest.setup.ts`
+- `src/test-utils/render.tsx` — `renderWithProviders` wrapping components in `QueryClientProvider`
 
-### 2.4 `jest.setup.ts` — New file
-- Extends Jest matchers with `@testing-library/jest-native`
-- Global `fetch` mock
-- Mocks: `react-native-reanimated`, `nativewind`, `AsyncStorage`, `react-native-safe-area-context`
-- `beforeEach(() => jest.clearAllMocks())`
+### Test Files (15 files, 108 tests)
 
----
+| File | Tests | Area |
+|------|-------|------|
+| `src/hooks/__tests__/use-promotion.test.ts` | 9 | Pure functions: `isPromoActive`, `getDiscountedPrice` |
+| `src/lib/__tests__/auth-storage.test.ts` | 7 | Token/user CRUD via SecureStore |
+| `src/lib/__tests__/api-client.test.ts` | 7 | Fetch wrapper: auth headers, 401 handling, error parsing |
+| `src/components/ui/__tests__/Button.test.tsx` | 6 | Render, loading spinner, disabled, onPress |
+| `src/components/ui/__tests__/Badge.test.tsx` | 5 | Render, variants, custom colors |
+| `src/components/ui/__tests__/ProgressBar.test.tsx` | 5 | Width %, clamping <0 and >100 |
+| `src/components/ui/__tests__/Avatar.test.tsx` | 6 | Initials logic, image rendering |
+| `src/components/ui/__tests__/Input.test.tsx` | 6 | Label, error, password toggle |
+| `src/components/shared/__tests__/EmptyState.test.tsx` | 7 | Title, description, icon, action button |
+| `src/components/services/__tests__/ServiceCard.test.tsx` | 7 | Service info, promo pricing, image placeholder |
+| `src/components/appointments/__tests__/AppointmentCard.test.tsx` | 11 | Status badge, cancel flow with Alert, clientNotes |
+| `src/providers/__tests__/BookingProvider.test.tsx` | 8 | Wizard state: set/reset service, staff, date, notes |
+| `src/providers/__tests__/AuthProvider.test.tsx` | 6 | Session restore, login, logout, register |
+| `app/(auth)/__tests__/login.test.tsx` | 5 | Inputs, empty field toast, login call, error toast |
+| `app/(auth)/__tests__/register.test.tsx` | 9 | Inputs, validation toasts (empty/mismatch/weak password), register call |
 
-## Phase 3 — Mock Files
+### Issues Fixed During Setup
 
-### 3.1 `__mocks__/expo-secure-store.ts`
-Mocks `getItemAsync`, `setItemAsync`, `deleteItemAsync` as `jest.fn()`.
+1. **`setupFilesAfterSetup` typo** → correct Jest key is `setupFilesAfterEnv`
+2. **`expo-modules-core` not transformed** → added to `transformIgnorePatterns`
+3. **`useTheme` crash** → moved ThemeProvider mock to `jest.setup.ts` (global) instead of per-file
+4. **API client 401 test** → was calling `apiClient` twice with single mock; fixed to single call with try/catch
+5. **Register screen "Crear Cuenta"** → text appears as heading + button; switched to `getAllByText` picking last match
 
-### 3.2 `__mocks__/expo-router.ts`
-Mocks `useRouter` (push, replace, back), `useSegments`, `Link`, `Stack`, `Tabs`.
+### Final Test Results
 
-### 3.3 `__mocks__/expo-splash-screen.ts`
-Mocks `preventAutoHideAsync`, `hideAsync`.
+```
+Test Suites: 15 passed, 15 total
+Tests:       108 passed, 108 total
+Snapshots:   0 total
 
-### 3.4 `__mocks__/expo-image.ts`
-Replaces `expo-image` `Image` with standard RN `Image`.
-
-### 3.5 `__mocks__/lucide-react-native.ts`
-All used icons (Scissors, Clock, Calendar, User, Eye, EyeOff, etc.) as stub `View` components.
-
-### 3.6 `__mocks__/react-native-toast-message.ts`
-`Toast.show` and `Toast.hide` as `jest.fn()`.
-
-### 3.7 `__mocks__/@expo/vector-icons.ts`
-Stub icon set components.
-
----
-
-## Phase 4 — Test Helper
-
-### `src/test-utils/render.tsx`
-Custom render wrapper providing `QueryClientProvider` (retry: false, gcTime: 0) + `ThemeProvider`.
-Used by component tests that depend on `useTheme()`.
-
----
-
-## Phase 5 — Test Files
-
-### 5.1 `src/hooks/__tests__/use-promotion.test.ts` — Pure Functions
-**Tests:** `isPromoActive` and `getDiscountedPrice`
-- isPromoActive: undefined config → false
-- isPromoActive: enabled=false → false
-- isPromoActive: wrong day → false
-- isPromoActive: correct day → true
-- getDiscountedPrice: inactive promo → original price
-- getDiscountedPrice: active but service not in list → original price
-- getDiscountedPrice: active + matching → discounted price
-- getDiscountedPrice: discount exceeds price → clamp to 0
-
-### 5.2 `src/lib/__tests__/auth-storage.test.ts` — Auth Storage
-**Tests:** SecureStore wrapper functions
-- saveToken/getToken round-trip
-- getToken returns null when empty
-- removeToken calls deleteItemAsync
-- saveUser serializes to JSON
-- getUser deserializes from JSON
-- getUser returns null for invalid JSON
-- clearAuth deletes both keys
-
-### 5.3 `src/lib/__tests__/api-client.test.ts` — API Client
-**Tests:** Fetch wrapper with auth
-- Attaches Bearer token from secure store
-- Skips auth header when skipAuth: true
-- No auth header when no token stored
-- Throws AuthError + clears auth on 401
-- Parses server error message on non-OK
-- Falls back to "Error {status}" on unparseable body
-- Returns {} for empty body (204)
-- Returns parsed JSON on success
-
-### 5.4 `src/components/ui/__tests__/Button.test.tsx`
-**Tests:** Button component
-- Renders string children
-- Loading shows ActivityIndicator
-- Disabled when loading=true
-- Disabled when disabled=true
-- Fires onPress when not disabled
-
-### 5.5 `src/components/ui/__tests__/Badge.test.tsx`
-**Tests:** Badge component
-- Renders children text
-- All variants render without crash
-- Custom backgroundColor applied
-- Custom color applied
-
-### 5.6 `src/components/ui/__tests__/ProgressBar.test.tsx`
-**Tests:** ProgressBar clamping
-- Correct width percentage
-- Clamps <0 to 0%
-- Clamps >100 to 100%
-
-### 5.7 `src/components/ui/__tests__/Avatar.test.tsx`
-**Tests:** Avatar initials + image
-- Single word name → first 2 chars
-- Two word name → initials of each
-- Three word name → first 2 initials
-- Lowercase → uppercased
-- Shows Image when source provided
-- Shows initials when source is null
-
-### 5.8 `src/components/ui/__tests__/Input.test.tsx`
-**Tests:** Input with label, error, password toggle
-- Renders label text
-- Displays error message
-- secureTextEntry true by default for isPassword
-- Eye icon press toggles visibility
-
-### 5.9 `src/components/shared/__tests__/EmptyState.test.tsx`
-**Tests:** EmptyState optional sections
-- Renders title
-- Optional description
-- Optional icon
-- Action button only when both actionLabel + onAction
-
-### 5.10 `src/components/services/__tests__/ServiceCard.test.tsx`
-**Tests:** ServiceCard with promotions
-- Service name, description, duration
-- Price without promo
-- Discounted price with active promo
-- onPress callback
-- Image vs placeholder (no imageUrl)
-
-### 5.11 `src/components/appointments/__tests__/AppointmentCard.test.tsx`
-**Tests:** AppointmentCard with cancel logic
-- Service name, staff name, status badge
-- Cancel button for PENDING/CONFIRMED
-- No cancel button for COMPLETED
-- Alert.alert on cancel press
-- Calls onCancel with appointment id on confirm
-- clientNotes section
-
-### 5.12 `src/providers/__tests__/BookingProvider.test.tsx`
-**Tests:** Booking wizard state management
-- Initial state all null/empty
-- setService/setStaff/setDateTime/setNotes update correctly
-- reset clears all state
-- State doesn't leak between fields
-- Throws outside provider
-
-### 5.13 `src/providers/__tests__/AuthProvider.test.tsx`
-**Tests:** Auth flows
-- Starts loading, resolves to unauthenticated
-- Restores session from SecureStore
-- No restore when token missing
-- Login success sets user
-- Login failure throws error
-- Logout clears state + storage
-- Register calls endpoint then auto-logins
-
-### 5.14 `app/(auth)/__tests__/login.test.tsx`
-**Tests:** Login screen integration
-- Renders email/password inputs
-- Error toast on empty fields
-- Calls login with trimmed email
-- Error toast on failed login
-
-### 5.15 `app/(auth)/__tests__/register.test.tsx`
-**Tests:** Register screen integration
-- Renders all form fields
-- Error toast for empty required fields
-- Error toast for mismatched passwords
-- Error toast for weak password (short, no uppercase, no digit)
-- Successful registration call
-
----
-
-## Phase 6 — Run Tests & Verify
-
-```bash
-npm test
+Coverage: 93.29% statements | 84.82% branches | 84.21% functions | 94.02% lines
 ```
 
-Expected: All 17 test files pass.
+---
+
+## Phase 2 — Production APK Build
+
+### Step 1: Updated Production URL
+
+Changed `src/constants/config.ts`:
+```
+- "https://your-production-domain.com"
++ "https://barberia-imperio-py.vercel.app"
+```
+
+### Step 2: EAS Build Configuration
+
+- Installed EAS CLI via `npx eas-cli`
+- Ran `npx eas-cli login` (Expo account: richardo880)
+- Ran `npx eas-cli build:configure` → generated `eas.json`
+- Updated `eas.json` preview profile to output APK:
+
+```json
+"preview": {
+  "distribution": "internal",
+  "android": {
+    "buildType": "apk"
+  }
+}
+```
+
+### Step 3: Built APK
+
+```bash
+npx eas-cli build --platform android --profile preview
+```
+
+Build completed successfully in Expo cloud.
+
+### Step 4: Install on Emulator
+
+- Initial install failed: `INSTALL_FAILED_UPDATE_INCOMPATIBLE` (signing key mismatch with old dev build)
+- Fixed by uninstalling old app: `adb uninstall com.barberpro.app`
+- Reinstalled via: `npx eas-cli build:run --platform android`
+
+### Step 5: Connection Error Fix
+
+- Login from APK returned "Error de conexión"
+- Root cause: backend mobile endpoints were not deployed to Vercel
+- The following files existed locally in `barberpro-nuevo` but were uncommitted:
+  - `src/app/api/auth/mobile-login/route.ts`
+  - `src/app/api/auth/mobile-google/route.ts`
+  - `src/lib/auth-mobile.ts`
+  - Modified `src/middleware.ts`
+- Committed and pushed to main → Vercel auto-deployed
+- Login working correctly after deployment
+
+### Verification
+
+Tested endpoint reachability:
+```bash
+curl -s -X POST https://barberia-imperio-py.vercel.app/api/auth/mobile-login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"test"}'
+# Before deploy: "Error: This action with HTTP POST is not supported by NextAuth.js"
+# After deploy: 400 (valid response from mobile-login route)
+```
 
 ---
 
-## Results
+## Final State
 
-*(Updated after execution)*
+- **Test suite**: 15 files, 108 tests, all passing, ~93% coverage
+- **APK**: Built via EAS `preview` profile, installed on Android emulator
+- **Production**: Connected to `https://barberia-imperio-py.vercel.app` (Vercel + Supabase)
+- **Login**: Working correctly end-to-end

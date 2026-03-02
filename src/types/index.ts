@@ -37,6 +37,8 @@ export interface StaffMember {
   staffProfileId: string;
 }
 
+export type PaymentStatus = "PENDING" | "APPROVED" | "REJECTED";
+
 export interface Appointment {
   id: string;
   startTime: string;
@@ -44,6 +46,8 @@ export interface Appointment {
   status: AppointmentStatus;
   clientNotes: string | null;
   staffNotes: string | null;
+  paymentProofUrl: string | null;
+  paymentStatus: PaymentStatus;
   createdAt: string;
   client: {
     id: string;
