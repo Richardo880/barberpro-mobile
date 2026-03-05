@@ -119,7 +119,7 @@ export default function ProfileScreen() {
         </View>
 
         <Text className="text-center text-xs text-muted-foreground mb-8">
-          BarberPro v1.0.0
+          Barbería Imperio v1.0.0
         </Text>
       </ScrollView>
     </SafeAreaView>

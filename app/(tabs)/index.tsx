@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
+import { LocationSection } from "@/src/components/home/LocationSection";
 import { AppointmentCard } from "@/src/components/appointments/AppointmentCard";
 import { LoadingSpinner } from "@/src/components/shared/LoadingSpinner";
 import { useAuth } from "@/src/providers/AuthProvider";
@@ -80,7 +81,7 @@ export default function HomeScreen() {
               Hola, {firstName}
             </Text>
             <Text className="mt-1 text-muted-foreground">
-              Bienvenido a BarberPro
+              Bienvenido a Barbería Imperio
             </Text>
           </View>
         </View>
@@ -166,6 +167,9 @@ export default function HomeScreen() {
             </Text>
           </Pressable>
         </View>
+
+        {/* Visit us section */}
+        <LocationSection />
       </ScrollView>
     </SafeAreaView>
   );

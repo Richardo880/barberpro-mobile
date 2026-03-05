@@ -175,19 +175,19 @@ export default function BookingStep4() {
           <View className="rounded-lg border border-border bg-muted/50 p-4 gap-2">
             <View className="flex-row justify-between">
               <Text className="text-sm text-muted-foreground">Banco:</Text>
-              <Text className="text-sm font-medium text-foreground">Banco Continental</Text>
+              <Text className="text-sm font-medium text-foreground">Ueno Bank</Text>
             </View>
             <View className="flex-row justify-between">
               <Text className="text-sm text-muted-foreground">Titular:</Text>
-              <Text className="text-sm font-medium text-foreground">Juan Antonio García López</Text>
+              <Text className="text-sm font-medium text-foreground">Edgar Cohene</Text>
             </View>
             <View className="flex-row justify-between">
-              <Text className="text-sm text-muted-foreground">Cédula:</Text>
-              <Text className="text-sm font-medium text-foreground">4.567.890</Text>
+              <Text className="text-sm text-muted-foreground">Alias:</Text>
+              <Text className="text-sm font-medium text-foreground">5741753</Text>
             </View>
             <View className="flex-row justify-between">
               <Text className="text-sm text-muted-foreground">Nro. Cuenta:</Text>
-              <Text className="text-sm font-medium text-foreground">123-456789-001</Text>
+              <Text className="text-sm font-medium text-foreground">18147097</Text>
             </View>
             <View className="border-t border-border pt-2 mt-1 flex-row justify-between">
               <Text className="text-sm text-muted-foreground">Monto a transferir:</Text>

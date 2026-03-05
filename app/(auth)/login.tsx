@@ -63,7 +63,7 @@ export default function LoginScreen() {
               <Scissors size={32} color={colors.primaryForeground} />
             </View>
             <Text className="text-3xl font-bold text-foreground">
-              BarberPro
+              Barbería Imperio
             </Text>
             <Text className="mt-2 text-muted-foreground">
               Inicia sesión en tu cuenta
